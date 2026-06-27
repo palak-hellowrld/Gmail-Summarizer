@@ -1,11 +1,10 @@
 import customtkinter as ct
+import fetch_emails
+import ai_Summarizer
 
-myEmailList={"email1":{"sender": "mom@gmail.com", "subject": "This is Mom", "summary": "This is a summary of the email from Mom."},
-             "email2":{"sender": "dad@gmail.com", "subject": "This is Dad", "summary": "This is a summary of the email from Dad."},
-             "email3":{"sender": "brother@gmail.com", "subject": "This is Brother", "summary": "This is a summary of the email from Brother."},
-             "email4":{"sender": "sister@gmail.com", "subject": "This is Sister", "summary": "This is a summary of the email from Sister."}, 
-             "email5":{"sender": "myself@gmail.com", "subject": "This is Myself", "summary": "This is a summary of the email from Myself."}, 
-            } 
+myEmailList=fetch_emails.allEmails
+emailMetadata=fetch_emails.getMetadata(myEmailList)
+emailSummary=ai_Summarizer.summarizer(fetch_emails.main(myEmailList))
 
 class EmailStackApp:
 
@@ -54,18 +53,12 @@ class EmailStackApp:
 
     def showHomeScreen(self):
         self.summaryScreen.frame.pack_forget()
-        self.homeScreen.frame.pack()
+        self.homeScreen.frame.pack(fill="both", expand=True)
         self.currentScreenFrame = self.homeScreen.frame
     
     
     def getEmail(self):
-        myEmails=""
-
-        for email in myEmailList:
-            emailData = myEmailList[email]
-            myEmails+=f"Sender: {emailData['sender']} \n Subject: {emailData['subject']} \n ========================\n"
-        
-        return myEmails
+        return self.emails
 
         
 
@@ -80,10 +73,10 @@ class welcomeScreen:
         self.envelopeEmojiButton=ct.CTkButton(master=self.backgroundEnvelopeFrame, text="\U00002709", text_color= "#0091FF", font=("Georgia",300), fg_color="transparent", command=(lambda:controller.showSummaryScreen()))
         self.envelopeEmojiButton.place(relx=0.5, rely=0.3, anchor="center")
 
-        self.numberEmailsLabel=ct.CTkLabel(master=self.backgroundEnvelopeFrame, text=f"You have {len(controller.emails)} \n new messages!", font=("Times New Roman", 50), text_color="#77003c")
+        self.numberEmailsLabel=ct.CTkLabel(master=self.backgroundEnvelopeFrame, text=f"You have {len(myEmailList)} \n new messages!", font=("Times New Roman", 50), text_color="#77003c")
         self.numberEmailsLabel.place(relx=0.5, rely=0.75, anchor="center")
 
-        self.numberCircle=ct.CTkLabel(master=self.backgroundEnvelopeFrame, text=f"{len(controller.emails)}", font=("Times New Roman", 50), width=45, height=45, text_color="#FFFFFF", fg_color="#cc2e2e", corner_radius=30)
+        self.numberCircle=ct.CTkLabel(master=self.backgroundEnvelopeFrame, text=f"{len(myEmailList)}", font=("Times New Roman", 50), width=45, height=45, text_color="#FFFFFF", fg_color="#cc2e2e", corner_radius=30)
         self.numberCircle.place(relx=0.7, rely=0.15, anchor="center")
         
         
@@ -94,8 +87,11 @@ class summaryScreen:
         self.summaryBoxFrame = ct.CTkFrame(master=self.frame, width=500, height=580, fg_color="#b1b1b1", corner_radius=15)
         self.summaryBoxFrame.pack(pady=30,padx=10)
 
-        self.summaryText = ct.CTkLabel(master=self.summaryBoxFrame, text="Summary", font=("Georgia", 50), text_color="#020086", fg_color="transparent")
+        self.summaryText = ct.CTkLabel(master=self.summaryBoxFrame, text=f"Summary", font=("Georgia", 50), text_color="#020086", fg_color="transparent")
         self.summaryText.place(relx=0.5, rely=0, anchor="n")
+
+        self.emailSummary = ct.CTkLabel(master=self.summaryBoxFrame, text=f"{emailSummary}", font=("Georgia", 20), text_color="#020086", fg_color="transparent", wraplength=450)
+        self.emailSummary.place(relx=0.5, rely=0.2, anchor="n")
 
         self.homeButton= ct.CTkButton(master=self.summaryBoxFrame, text="Home", font=("Comic Sans MS", 16), text_color="#BFBFBF", fg_color="#020086", command=lambda: controller.showHomeScreen())
         self.homeButton.place(x=185, y=550)
@@ -109,17 +105,20 @@ class homeScreen:
         self.summaryBoxScrollableFrame = ct.CTkScrollableFrame(master=self.frame, width=270, height=500, fg_color="#b1b1b1", corner_radius=15)
         self.summaryBoxScrollableFrame.pack(side="left",pady=50,padx=10)
 
-        self.summaryText = ct.CTkLabel(master=self.summaryBoxScrollableFrame, text="Summary", font=("Georgia", 50), text_color="#020086", fg_color="#b1b1b1")
+        self.summaryText = ct.CTkLabel(master=self.summaryBoxScrollableFrame, text="Summary", font=("Georgia", 30), text_color="#020086", fg_color="#b1b1b1")
         self.summaryText.pack(pady=10)
 
-        self.emailListFrame = ct.CTkScrollableFrame(master=self.frame, width=270, height=500, fg_color="#b1b1b1", corner_radius=15)
+        self.emailsSummary = ct.CTkLabel(master=self.summaryBoxScrollableFrame, text=emailSummary, font=("Georgia", 16), text_color="#020086", fg_color="#b1b1b1",wraplength=240)
+        self.emailsSummary.pack(pady=10)
+
+        self.emailListFrame = ct.CTkScrollableFrame(master=self.frame, width=270, height=500, fg_color="#020086", corner_radius=15)
         self.emailListFrame.pack(side="left",pady=50,padx=10)
 
-        self.emailList = ct.CTkLabel(master=self.emailListFrame, text=controller.getEmail(), font=("Georgia", 15), text_color="#020086", fg_color="#b1b1b1")
+        self.emailList = ct.CTkLabel(master=self.emailListFrame, text=controller.getEmail(), font=("Georgia", 15), text_color="#b1b1b1", fg_color="#020086", wraplength=240)
         self.emailList.pack(pady=10)
 
 
 
 if __name__ == "__main__":
-    app = EmailStackApp(myEmailList)
+    app = EmailStackApp(emailMetadata)
     
