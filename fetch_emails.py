@@ -79,18 +79,36 @@ def get_todays_emails(service):
         msg_data = (
             service.users()
             .messages()
-            .get(userId="me", id=msg["id"], format="metadata",
+            .get(userId="me", id=msg["id"], format="full",
                  metadataHeaders=["From", "Subject"])
             .execute()
         )
+
+        body= get_email_body(msg_data)
 
         headers = msg_data["payload"]["headers"]
         sender = next((h["value"] for h in headers if h["name"] == "From"), "(unknown sender)")
         subject = next((h["value"] for h in headers if h["name"] == "Subject"), "(no subject)")
 
-        email_summaries.append((sender, subject))
+        email_summaries.append({"sender": sender, "subject": subject, "body": body})
 
     return email_summaries
+
+def get_email_body(msg_data):
+    found=False
+    if msg_data["payload"]["mimeType"] == "text/plain":
+        message = msg_data["payload"]["body"]["data"]
+    
+    else:
+        for part in msg_data["payload"].get("parts", []):
+            if part["mimeType"] == "text/plain":
+                message = part["body"]["data"]
+                break
+        if message is None:
+            return ""
+        
+    return base64.urlsafe_b64decode(message).decode("utf-8")
+    
 
 
 def main():
