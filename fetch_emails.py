@@ -83,7 +83,7 @@ allEmails = get_todays_emails(service)
 def main(emails):
     print(f"\nFound {len(emails)} email(s) today:\n")
 
-    allEmailBody="None"
+    allEmailBody=""
     for email in emails:
         allEmailBody+=f"{email['body']}\n\n new email: \n"
 
@@ -97,4 +97,4 @@ def getMetadata(emails):
         
 
 if __name__ == "__main__":
-    main()
+    main(allEmails)

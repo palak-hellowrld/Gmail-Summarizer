@@ -1,0 +1,11 @@
+.git
+.gitignore
+__pycache__/
+venv/
+.env
+credentials.json
+token.json
+app_UI.py
+README.md
+Dockerfile
+.dockerignore
